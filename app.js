@@ -1,9 +1,11 @@
 var connect = require('connect')
-  , app = connect()
-  , server = require('http').createServer(app)
-  , io = require('socket.io').listen(server);
+    ,app = connect()
+	,server = require('http').createServer(app)
+	,io = require('socket.io').listen(server);
 
-server.listen(8080);
+var port = 8000;
+server.listen(port);
+console.log("Server listening on localhost:8000");
 
 app.use(connect.static('www'));
 
@@ -11,36 +13,42 @@ var chats = {};
 var id = 0;
 
 io.sockets.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
+	var commandBus = new CommandBus(socket, handlers);
 
-  socket.on('chats:create', function (data, callback) {
-  	data.id = ++id;
-    chats[id] = data;
+	socket.emit('news', { hello: 'world' });
 
-    socket.emit('chats:create', data);
-    socket.broadcast.emit('chats:create', data);
+	socket.on('commands', function (data, callback) {
+		console.log(data);
+		commandBus.handle(data);
+	});
 
-    callback(null, data);
-  });
-
-  socket.on('chats:update', function (data, callback) {
-  	console.log(data);
-  });
-
-  socket.on('messages:create', function (data, callback) {
-  	var chat = chats[data.chat];
-    
-    if (chat.messages == undefined) {
-    	chat.messages = {};
-    	chat.messageId = 0;
-    }
-
-    data.id = ++chat.messageId;
-    chat.messages[data.id] = data;
-
-    socket.emit('messages:create', data);
-    socket.broadcast.emit('messages:create', data);
-
-    callback(null, data);
-  });
 });
+
+var handlers = {
+	createChat: function(command) {
+		this.socket.emit('events', {name:'chatCreated', payload: command});
+	},
+	sendMessage: function(command) {
+		this.socket.emit('events', {name:'messageSent', payload: command});
+	},
+	changePerson: function(command) {
+		this.socket.emit('events', {name: 'personChanged', payload: command});
+	}
+};
+
+function CommandBus(socket, handlers) {
+	this.socket = socket;
+	this.handlers = handlers;
+}
+
+CommandBus.prototype = {
+	handle: function(command) {
+		if (!command.name || !this.handlers[command.name]) {
+			console.log("Command does not exist. :" + JSON.stringify(command));
+			return;
+			throw new Error("Command does not exist. :" + JSON.stringify(command));
+		}
+
+		this.handlers[command.name].call(this, command.payload);
+	}
+};

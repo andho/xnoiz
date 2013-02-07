@@ -17,7 +17,8 @@
   "license": "BSD",
   "dependencies": {
     "socket.io": "~0.9.11",
-    "connect": "~2.7.0"
+    "connect": "~2.7.0",
+    "underscore": "~1.4.4"
   },
   "amd": {},
   "volo": {

@@ -11,7 +11,7 @@ function($, Backbone, _, template) {
 		},
 
 		appendMessage: function(msg) {
-			var msghtml = this.template(msg.toJSON());
+			var msghtml = this.template(msg);
 
 			$(this.el).append(msghtml);
 		},

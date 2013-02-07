@@ -1,5 +1,7 @@
-define(['jquery', 'backbone', 'underscore', 'app/models/chat', 'text!templates/chat/main.html', 'app/views/chat/chat'],
-function(jquery, Backbone, _, Chat, template, ChatView) {
+define(['jquery', 'backbone', 'underscore',
+	'app/models/participant',
+	'app/models/chat', 'text!templates/chat/main.html', 'app/views/chat/chat'],
+function(jquery, Backbone, _, Participant, Chat, template, ChatView) {
 	var ChatMainView = Backbone.View.extend({
 		el: 'body',
 
@@ -11,6 +13,8 @@ function(jquery, Backbone, _, Chat, template, ChatView) {
 			this.model.bind('add', this.newChat, this);
 			this.model.bind('remove', this.removeChat, this);
 			this.model.bind('change', this.moveChat, this);
+
+			this.participants = this.options.participants;
 		},
 
 		render: function() {
@@ -20,21 +24,25 @@ function(jquery, Backbone, _, Chat, template, ChatView) {
 		},
 
 		newChat: function(chat) {
-			var view = new ChatView({model: chat});
+			chat.bindCQRS();
+			var view = new ChatView({
+				model: chat,
+				participants: Participant.Collection()
+			});
 			$('#chat-container', this.el).append(view.el);
 			view.render();
 		},
 
 		create: function() {
-			var chat = new Chat.Model();
-			chat.addParticipant(this.options.name);
-			this.model.add(chat, {silent: true});
-
-			var self = this;
-			chat.save(null, {success: function(data) {
-				self.model.trigger('add', chat);
-			}});
+			new Backbone.CQRS.Command({
+				name: 'createChat',
+				payload: {
+					id: 1
+				}
+			}).emit();
 		},
+
+
 
 	});
 

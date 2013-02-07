@@ -6,7 +6,7 @@
 requirejs.config({
     baseUrl: 'js/lib',
     paths: {
-        'socket.io': '/socket.io/socket.io.js',
+        'socket.io': '/socket.io/socket.io',
         app: '../app',
         templates: '../../templates'
     }

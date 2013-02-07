@@ -16,6 +16,17 @@ function(jquery, Backbone, template) {
 
 		start: function(e) {
 			e.preventDefault();
+			
+		    var cmd = new Backbone.CQRS.Command({
+		        name: 'changePerson',
+		        payLoad: {
+		            id: 9,
+		            name: 'My name'
+		        }
+		    });
+
+		    cmd.emit();
+
 			this.trigger('start', $('#name', this.el).val());
 		},
 

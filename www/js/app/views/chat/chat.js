@@ -10,31 +10,37 @@ define(['jquery', 'backbone', 'underscore', 'text!templates/chat/chat.html',
 		},
 
 		initialize: function() {
-			this.messages = new Message.Collection();
 		},
 
 		render: function() {
-			console.log(this.model);
 			$(this.el).html(this.template({id: this.model.cid}));
 
 			$('#msgtxt', this.el).get(0).focus();
-			this.bind(this.model.cid+':messagesent', this.addMessage, this);
+			//this.bind(this.model.cid+':messagesent', this.addMessage, this);
 
 			var messagesView = new MessagesListView();
-			this.messages.bind('add', messagesView.appendMessage, messagesView);
+			this.model.bind('messageAdded', messagesView.appendMessage, messagesView);
 
 			$('.messages', this.el).html(messagesView.el);
 
-			var participantsListView = new ParticipantsListView();
+			/*var participantsListView = new ParticipantsListView();
 			this.model.get('participants').bind('add', participantsListView.addParticipant, participantsListView);
-			$('.participants', this.el).html(participantsListView.el);
+			$('.participants', this.el).html(participantsListView.el);*/
 		},
 
 		sendMessage: function(e) {
+			console.log('sfsdfs');
 			e.preventDefault();
 			var msg = $('#msgtxt').val();
 
-			this.trigger(this.model.cid+':messagesent', msg);
+			var cmd = new Backbone.CQRS.Command({
+				name: 'sendMessage',
+				payload: {
+					id: this.model.id,
+					msg: msg
+				}
+			});
+			cmd.emit();
 		},
 
 		addMessage: function(msg) {

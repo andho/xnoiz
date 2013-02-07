@@ -6,8 +6,20 @@ define(function (require) {
 
     // initialize the socket io client
     var socket = require('app/socket');
-    require('backbone.iobind');
-    require('backbone.iosync');
+
+    socket.on('events', function(data) {
+        console.log(data);
+        Backbone.CQRS.hub.emit('events', data);
+    });
+
+    require('backbone.cqrs');
+
+    Backbone.CQRS.hub.init();
+    Backbone.sync = Backbone.CQRS.sync;
+
+    Backbone.CQRS.hub.on('commands', function(data) {
+        socket.emit('commands', data);
+    });
 
     var Router = require('app/router');
     var router = new Router();

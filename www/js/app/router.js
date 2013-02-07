@@ -1,7 +1,7 @@
 define(['backbone', 'app/views/welcome', 'app/views/chat/main', 'app/models/chat'],
 function(Backbone, WelcomeView, ChatView, Chat) {
 
-	var chats = new Chat.Collection();
+	var chats = Chat.Collection;
 
 	var Router = Backbone.Router.extend({
 
@@ -20,7 +20,10 @@ function(Backbone, WelcomeView, ChatView, Chat) {
 		},
 
 		start: function(name) {
-			var view = new ChatView({model: chats, name: name});
+			var view = new ChatView({
+				model: chats,
+				name: name
+			});
 
 			view.render();
 		},
