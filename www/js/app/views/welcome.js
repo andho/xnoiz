@@ -21,7 +21,7 @@ function(jquery, Backbone, template) {
 		        name: 'changePerson',
 		        payLoad: {
 		            id: 9,
-		            name: 'My name'
+		            name: $('#name', this.el).val()
 		        }
 		    });
 
