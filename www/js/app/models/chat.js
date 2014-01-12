@@ -51,7 +51,8 @@ define(['backbone'], function(Backbone) {
 	});
 
 	return {
-		Collection: chats
+		Collection: chats,
+		Model: Chat
 	};
 
 });

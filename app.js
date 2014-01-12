@@ -1,5 +1,6 @@
 var connect = require('connect')
-    ,app = connect()
+	,express = require('express')
+    ,app = express()
 	,server = require('http').createServer(app)
 	,io = require('socket.io').listen(server);
 
@@ -10,7 +11,9 @@ console.log("Server listening on localhost:8000");
 app.use(connect.static('www'));
 
 var chats = {};
+var person = null;
 var id = 0;
+var sockets = {};
 
 io.sockets.on('connection', function (socket) {
 	var commandBus = new CommandBus(socket, handlers);
@@ -26,12 +29,24 @@ io.sockets.on('connection', function (socket) {
 
 var handlers = {
 	createChat: function(command) {
+		var chat = command;
+		chat.messages = [];
+		chat.user = person;
+		chats[command.id] = chat;
 		this.socket.emit('events', {name:'chatCreated', payload: command});
 	},
 	sendMessage: function(command) {
-		this.socket.emit('events', {name:'messageSent', payload: command});
+		var chat = chats[command.id];
+		chat.messages.push({msg: command.msg, user: person});
+		//this.socket.emit('events', {name:'messageSent', payload: command});
+
+		for (var i in sockets) {
+			sockets[i].emit('events', {name:'messageSent', payload: command});
+		}
 	},
 	changePerson: function(command) {
+		person = command;
+		sockets[command.id] = this.socket;
 		this.socket.emit('events', {name: 'personChanged', payload: command});
 	}
 };
@@ -52,3 +67,13 @@ CommandBus.prototype = {
 		this.handlers[command.name].call(this, command.payload);
 	}
 };
+
+app.get('/chat/:id', function(req, res) {
+	var chat = chats[req.params.id];
+	if (!chat) {
+		res.send("Not found");
+		return;
+	}
+
+	res.send(JSON.stringify(chat));
+});

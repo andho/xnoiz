@@ -19,8 +19,8 @@ function(jquery, Backbone, template) {
 			
 		    var cmd = new Backbone.CQRS.Command({
 		        name: 'changePerson',
-		        payLoad: {
-		            id: 9,
+		        payload: {
+		            id: Math.floor(Math.random()*1000000),
 		            name: $('#name', this.el).val()
 		        }
 		    });

@@ -13,7 +13,7 @@ define(['jquery', 'backbone', 'underscore', 'text!templates/chat/chat.html',
 		},
 
 		render: function() {
-			$(this.el).html(this.template({id: this.model.cid}));
+			$(this.el).html(this.template({id: this.model.id}));
 
 			$('#msgtxt', this.el).get(0).focus();
 			//this.bind(this.model.cid+':messagesent', this.addMessage, this);
@@ -31,7 +31,7 @@ define(['jquery', 'backbone', 'underscore', 'text!templates/chat/chat.html',
 		sendMessage: function(e) {
 			console.log('sfsdfs');
 			e.preventDefault();
-			var msg = $('#msgtxt').val();
+			var msg = $('#msgtxt', this.el).val();
 
 			var cmd = new Backbone.CQRS.Command({
 				name: 'sendMessage',

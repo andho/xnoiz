@@ -7,6 +7,10 @@ function(jquery, Backbone, _, Participant, Chat, template, ChatView) {
 
 		template: _.template(template),
 
+		events: {
+			"click #join-chat": "joinChat"
+		},
+
 		initialize: function() {
 			this.bind('create', this.create, this);
 
@@ -33,11 +37,37 @@ function(jquery, Backbone, _, Participant, Chat, template, ChatView) {
 			view.render();
 		},
 
+		joinChat: function() {
+			var _this = this;
+			var id = $('#chat-name', this.el).val();
+			if (id == '') {
+				alert("Please input an id");
+				return;
+			}
+
+			$.ajax({
+				url: 'chat/'+id,
+				dataType:'json',
+				success: function(chat) {
+					var participants = new Participant.Collection();
+					participants.add(chat.user);
+					participants.add({name: _this.name});
+					var chat = new Chat.Model({
+						id: chat.id,
+						messages: chat.messages,
+						participants: participants
+					});
+
+					_this.model.add(chat);
+				}
+			});
+		},
+
 		create: function() {
 			new Backbone.CQRS.Command({
 				name: 'createChat',
 				payload: {
-					id: 1
+					id: Math.floor(Math.random()*1000000)
 				}
 			}).emit();
 		},
